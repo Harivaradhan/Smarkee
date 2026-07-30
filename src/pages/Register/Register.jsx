@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { AccountCircle, Email, Phone, Lock, LocationOn, Business } from '@mui/icons-material';
 import { validateEmail, validatePhone, validatePassword } from '../../utils/validation.js';
+import customerService from '../../services/customerService.js';
 
 const roles = ['User', 'Manufacturer', 'Consumer'];
 
@@ -38,6 +39,9 @@ export default function Register() {
     shopName: '',
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitError, setSubmitError] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -70,15 +74,32 @@ export default function Register() {
       if (!form.address.trim()) nextErrors.address = 'Company Address is required.';
     }
 
-
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setSubmitMessage('');
+    setSubmitError(false);
+
     if (!validate()) return;
-    navigate('/login');
+
+    setLoading(true);
+    try {
+      await customerService.registerCustomer({ form, role });
+      setSubmitMessage('Registration successful. Redirecting to login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1200);
+    } catch (error) {
+      const fieldErrors = error.fieldErrors || {};
+      setErrors((current) => ({ ...current, ...fieldErrors }));
+      setSubmitError(true);
+      setSubmitMessage(error.message || 'Registration failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -302,12 +323,17 @@ export default function Register() {
           </Grid>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-            <Button type="submit" variant="contained" size="large" sx={{ py: 1.5 }}>
-              Register
+            <Button type="submit" variant="contained" size="large" sx={{ py: 1.5 }} disabled={loading}>
+              {loading ? 'Registering...' : 'Register'}
             </Button>
             <Button variant="text" color="primary" onClick={() => navigate('/login')}>
               Already have an account? Login
             </Button>
+            {submitMessage && (
+              <Typography variant="body2" color={submitError ? 'error' : 'success.main'} sx={{ mt: 1 }}>
+                {submitMessage}
+              </Typography>
+            )}
           </Box>
         </Box>
       </Paper>

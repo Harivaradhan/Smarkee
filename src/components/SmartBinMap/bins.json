@@ -1,0 +1,46 @@
+[
+  {
+    "id": "B1",
+    "name": "TCS - Technopark",
+    "location": "Technopark, Trivandrum",
+    "lat": 8.5241,
+    "lng": 76.9366,
+    "status": "Active",
+    "fillLevel": "45%",
+    "bottlesCollected": 1240,
+    "lastEmptied": "2026-07-28 10:30"
+  },
+  {
+    "id": "B2",
+    "name": "UST",
+    "location": "Technopark Campus, Trivandrum",
+    "lat": 8.5286,
+    "lng": 76.9396,
+    "status": "Active",
+    "fillLevel": "62%",
+    "bottlesCollected": 860,
+    "lastEmptied": "2026-07-28 08:15"
+  },
+  {
+    "id": "B3",
+    "name": "Magic Planet",
+    "location": "Magic Planet, Thiruvananthapuram",
+    "lat": 8.5180,
+    "lng": 76.9360,
+    "status": "Needs Attention",
+    "fillLevel": "88%",
+    "bottlesCollected": 1940,
+    "lastEmptied": "2026-07-27 18:40"
+  },
+  {
+    "id": "B4",
+    "name": "College of Engineering Trivandrum (CET)",
+    "location": "CET Campus, Trivandrum",
+    "lat": 8.5134,
+    "lng": 76.9570,
+    "status": "Active",
+    "fillLevel": "30%",
+    "bottlesCollected": 420,
+    "lastEmptied": "2026-07-28 06:50"
+  }
+]

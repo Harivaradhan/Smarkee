@@ -5,6 +5,7 @@ import distributorData from './distributorData';
 import DashboardMetricCard from '../../components/AdminDashboard/DashboardMetricCard.jsx';
 import DashboardSectionCard from '../../components/AdminDashboard/DashboardSectionCard.jsx';
 import DashboardTable from '../../components/AdminDashboard/DashboardTable.jsx';
+import SmartBinMap from '../../components/SmartBinMap/SmartBinMap.jsx';
 
 import {
   Chart as ChartJS,
@@ -142,6 +143,13 @@ export default function DistributorDashboard() {
               ))}
             </DashboardSectionCard>
           </Box>
+        </Grid>
+
+        {/* Map */}
+        <Grid item xs={12}>
+          <DashboardSectionCard title="Smart Bin Map">
+            <SmartBinMap height={380} />
+          </DashboardSectionCard>
         </Grid>
 
         {/* Table */}

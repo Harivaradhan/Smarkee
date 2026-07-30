@@ -1,4 +1,5 @@
-import { Box, Typography, Grid, Paper, Avatar, Stack } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, Grid, Paper, Avatar, Stack, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import DashboardMetricCard from '../../components/AdminDashboard/DashboardMetricCard.jsx';
 import DashboardSectionCard from '../../components/AdminDashboard/DashboardSectionCard.jsx';
 import AnalyticsChart from '../../components/AdminDashboard/AnalyticsChart.jsx';
@@ -11,8 +12,68 @@ import {
   tableRows,
   insights,
 } from './manufacturerData.js';
+import useAuth from '../../hooks/useAuth.js';
+import productService from '../../services/productService.js';
 
 export default function ManufacturerDashboard() {
+  const { user } = useAuth();
+  const [addOpen, setAddOpen] = useState(false);
+  const [productForm, setProductForm] = useState({ productName: '', barcode: '', size: '' });
+  const [formErrors, setFormErrors] = useState({});
+  const [adding, setAdding] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMessage, setSnackMessage] = useState('');
+
+  const openAdd = () => setAddOpen(true);
+  const closeAdd = () => setAddOpen(false);
+
+  const handleProductChange = (e) => {
+    const { name, value } = e.target;
+    setProductForm((p) => ({ ...p, [name]: value }));
+  };
+
+  const validateProduct = () => {
+    const errs = {};
+    if (!productForm.productName.trim()) errs.productName = 'Product Name is required.';
+    if (!productForm.barcode.trim()) errs.barcode = 'Barcode is required.';
+    if (!productForm.size.trim()) errs.size = 'Size is required.';
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const submitProduct = async () => {
+    if (!validateProduct()) return;
+    setAdding(true);
+    setFormErrors({});
+    try {
+      const manufacturerId = user?.id || Number(import.meta.env.VITE_MANUFACTURER_ID) || 0;
+      await productService.addProduct({
+        manufacturerId,
+        productName: productForm.productName,
+        barcode: productForm.barcode,
+        size: productForm.size,
+      });
+      setSnackMessage('Product added successfully');
+      setSnackOpen(true);
+      setProductForm({ productName: '', barcode: '', size: '' });
+      closeAdd();
+      // TODO: refresh product list if present
+    } catch (err) {
+      if (err.fieldErrors) {
+        // map backend keys to our form keys when needed
+        const mapped = {};
+        Object.entries(err.fieldErrors).forEach(([k, v]) => {
+          if (k === 'product_name') mapped.productName = v;
+          else mapped[k] = v;
+        });
+        setFormErrors(mapped);
+      }
+      setSnackMessage(err.message || 'Failed to add product');
+      setSnackOpen(true);
+    } finally {
+      setAdding(false);
+    }
+  };
   const tableColumns = [
     { field: 'region', headerName: 'Region' },
     { field: 'sold', headerName: 'Bottles Sold' },
@@ -37,7 +98,60 @@ export default function ManufacturerDashboard() {
             </Typography>
           </Box>
         </Box>
+        <Box>
+          <Button variant="contained" onClick={openAdd} sx={{ py: 1 }}>
+            Add Product
+          </Button>
+        </Box>
       </Box>
+
+      <Dialog open={addOpen} onClose={closeAdd} fullWidth maxWidth="sm">
+        <DialogTitle>Add Product</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Product Name"
+            name="productName"
+            value={productForm.productName}
+            onChange={handleProductChange}
+            error={Boolean(formErrors.productName)}
+            helperText={formErrors.productName}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Barcode"
+            name="barcode"
+            value={productForm.barcode}
+            onChange={handleProductChange}
+            error={Boolean(formErrors.barcode)}
+            helperText={formErrors.barcode}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Size"
+            name="size"
+            value={productForm.size}
+            onChange={handleProductChange}
+            error={Boolean(formErrors.size)}
+            helperText={formErrors.size}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeAdd} disabled={adding}>Cancel</Button>
+          <Button onClick={submitProduct} variant="contained" disabled={adding}>
+            {adding ? 'Adding...' : 'Add Product'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snackOpen} autoHideDuration={4000} onClose={() => setSnackOpen(false)}>
+        <Alert onClose={() => setSnackOpen(false)} severity={formErrors && Object.keys(formErrors).length ? 'error' : 'success'} sx={{ width: '100%' }}>
+          {snackMessage}
+        </Alert>
+      </Snackbar>
 
       <Grid container spacing={2} sx={{ mt: 3 }}>
         {metrics.map((m) => (

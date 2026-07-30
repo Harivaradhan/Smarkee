@@ -3,6 +3,7 @@ import DashboardMetricCard from '../../components/AdminDashboard/DashboardMetric
 import DashboardSectionCard from '../../components/AdminDashboard/DashboardSectionCard.jsx';
 import AnalyticsChart from '../../components/AdminDashboard/AnalyticsChart.jsx';
 import DashboardTable from '../../components/AdminDashboard/DashboardTable.jsx';
+import SmartBinMap from '../../components/SmartBinMap/SmartBinMap.jsx';
 import { people, smartBins, notifications } from './adminData.js';
 import {
   People as PeopleIcon,
@@ -234,6 +235,14 @@ export default function AdminDashboard() {
         <Grid item xs={12} md={6}>
           <DashboardSectionCard title="Recent Manufacturer Registrations">
             <DashboardTable columns={registrationsColumns} rows={people} onView={(row) => console.log('View', row)} />
+          </DashboardSectionCard>
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        <Grid item xs={12}>
+          <DashboardSectionCard title="Smart Bin Map">
+            <SmartBinMap height={420} />
           </DashboardSectionCard>
         </Grid>
       </Grid>

@@ -1,0 +1,197 @@
+API Contract for SMARKEE Frontend
+
+1) Authentication
+
+POST /auth/login
+Request JSON:
+{
+  "username": "string",
+  "password": "string",
+  "role": "Admin|Manufacturer|Distributor|User"
+}
+
+Successful Response JSON (frontend accepts either shape):
+Option A:
+{
+  "token": "jwt-or-session-token",
+  "user": {
+    "id": "string|number",    // optional but helpful
+    "username": "string",
+    "fullName": "string",
+    "role": "Admin|Manufacturer|Distributor|User",
+    "email": "string (optional)",
+    "phone": "string (optional)"
+  }
+}
+
+Option B (alternate keys):
+{
+  "accessToken": "jwt-or-session-token",
+  "user": { /* same user object as above */ }
+}
+
+Notes:
+- Frontend code (AuthProvider) will accept response.token OR response.accessToken and response.user OR the whole response as user if shaped differently.
+- If you provide only a token and then an endpoint to fetch the user (`GET /auth/me`), that's fine.
+
+GET /auth/me
+Response:
+{
+  "id": "string|number",
+  "username": "string",
+  "fullName": "string",
+  "role": "Admin|Manufacturer|Distributor|User",
+  "email": "string",
+  "phone": "string"
+}
+
+POST /auth/register
+Request:
+{
+  "company"?: "string",
+  "username": "string",
+  "password": "string",
+  "email": "string",
+  "role": "string",
+  /* additional registration fields as required */
+}
+
+Response: standard 201 created with created user object or success message.
+
+-----------------------------------------------------------------
+2) Smart Bins (Map + Tables)
+
+GET /bins
+Response array (matches `src/components/SmartBinMap/bins.json`):
+[
+  {
+    "id": "B1",
+    "name": "TCS - Technopark",
+    "location": "Technopark, Trivandrum",
+    "lat": 8.5241,
+    "lng": 76.9366,
+    "status": "Active|Needs Attention|Offline|Maintenance",
+    "fillLevel": "0% - 100% (string ok)",
+    "bottlesCollected": 1240,
+    "lastEmptied": "YYYY-MM-DD HH:mm"
+  },
+  ...
+]
+
+GET /admin/smartbins (for admin table view)
+Response rows (matches `src/pages/AdminDashboard/adminData.js` -> `smartBins`):
+[
+  { "id": "BIN-1039", "location": "Tech Park Zone", "city": "Bengaluru", "fill": "68%", "battery": "76%", "status": "Active" },
+  ...
+]
+
+-----------------------------------------------------------------
+3) Admin Data
+
+GET /admin/people
+Response (registrations list):
+[
+  { "id": 1, "company": "NaturaPack Private Ltd.", "gst": "29AAB...", "city": "Bengaluru", "contact": "Priya Sharma", "date": "20 Jul 2026", "status": "Approved|Pending|Rejected" },
+  ...
+]
+
+GET /admin/notifications
+Response:
+[
+  { "id": "n1", "title": "Sensor Calibration Due", "body": "Bin BIN-4125 requires battery...", "type": "Alert|Info|Success" },
+  ...
+]
+
+-----------------------------------------------------------------
+4) Distributor Dashboard
+
+GET /distributor/summary
+Response:
+{
+  "totalDistributed": 124560,
+  "totalRecycled": 78430,
+  "activeCities": 18,
+  "highestDemandProduct": "Sprite 500ml",
+  "recyclingRate": 63.07
+}
+
+GET /distributor/data
+Response (single payload containing full dataset):
+{
+  "cities": ["Kochi","Trivandrum",...],
+  "products": ["Sprite 500ml","Pepsi 500ml",...],
+  "demandByCity": {
+    "Kochi": [18450,10250,6120,4200],
+    "Trivandrum": [14320,8230,5020,3110],
+    ...
+  },
+  "monthlyTrend": { "labels": ["May","Jun",...], "values": [42000,48000,...] },
+  "insights": ["string", ...],
+  "tableRows": [ { "product":"Sprite 500ml","city":"Kochi","distributed":12450,"recycled":8930,"recyclingPct":71.7,"demandLevel":"High" }, ... ],
+  "topDemandByCity": [ { "city":"Kochi","product":"Sprite 500ml","qty":18450 }, ... ]
+}
+
+-----------------------------------------------------------------
+5) User Dashboard / Profile / Scanning
+
+GET /user/profile
+Response (matches `src/pages/UserDashboard/userData.js` -> `profileData`):
+{
+  "name": "Hari Varadhan",
+  "email": "hari.varadhan@example.com",
+  "phone": "+91 98765 43210",
+  "city": "Bengaluru",
+  "bottles": 186,
+  "carbonSaved": "32.8 kg"
+}
+
+GET /user/stats
+Response (array shown as `userStats`):
+[
+  { "label": "Reward Points", "value": "2,450", "icon": "Star", "color": "#2E7D32" },
+  ...
+]
+
+GET /user/recent-activity
+Response:
+[
+  { "id": 1, "title": "Pepsi Bottle", "subtitle": "Today, 10:35 AM", "points": 20, "status": "Success" },
+  ...
+]
+
+GET /user/scan-history
+Response:
+[
+  { "date": "22 Jul 2026", "bottleId": "BOTTLE-4981", "points": 25, "status": "Disposed" },
+  ...
+]
+
+GET /rewards
+Response:
+[
+  { "title":"Free Recycle Kit", "points":500, "description":"Redeem for a starter recycling kit." },
+  ...
+]
+
+POST /scan (when user scans a bottle)
+Request:
+{ "bottleId": "string", "userId": "string or number", "binId"?: "string" }
+Response:
+{ "success": true, "pointsAwarded": 20, "newTotalPoints": 2490 }
+
+-----------------------------------------------------------------
+6) General notes & conventions
+- Timestamps: use ISO 8601 (e.g. "2026-07-28T10:30:00Z") or the human-friendly format used in the demo data (frontend displays raw strings).
+- Numeric values: where frontend expects numbers (counts, quantities), send numbers (not strings). UI demo files may contain formatted strings (e.g., "2,450" for display) — backend should return raw numbers and frontend can format them.
+- Localization: dates/times may be localized on the frontend — returning ISO strings is safest.
+- Pagination & filters: for large lists (bins, notifications, people), prefer supporting query params: `?page=1&pageSize=50`, `?city=...`, `?status=...`.
+- Errors: use standard HTTP status codes and JSON error body: `{ "error": "message", "details": {...} }`.
+
+-----------------------------------------------------------------
+7) Files in the repo that mirror frontend shapes
+- `src/components/SmartBinMap/bins.json` (example bins payload for the map)
+- `src/pages/AdminDashboard/adminData.js` (admin table and notification shapes)
+- `src/pages/DistributorDashboard/distributorData.js` (distributor shapes)
+- `src/pages/UserDashboard/userData.js` (user/profile shapes)
+
+If you want, I can also produce a compact OpenAPI-like JSON (or Postman collection) from this contract.
