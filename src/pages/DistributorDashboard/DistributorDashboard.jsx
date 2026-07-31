@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Grid, Paper, Typography, Card, CardContent, Divider, Chip } from '@mui/material';
-import { Bar, Line } from 'react-chartjs-2';
+import { Box, Grid, Typography, Card, CardContent, Divider } from '@mui/material';
+import { Bar } from 'react-chartjs-2';
 import distributorData from './distributorData';
 import DashboardMetricCard from '../../components/AdminDashboard/DashboardMetricCard.jsx';
 import DashboardSectionCard from '../../components/AdminDashboard/DashboardSectionCard.jsx';
@@ -12,9 +12,6 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
-  Title,
   Tooltip,
   Legend,
 } from 'chart.js';
@@ -23,9 +20,6 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
-  Title,
   Tooltip,
   Legend
 );
@@ -45,23 +39,6 @@ function buildBarData() {
   }));
 
   return { labels: cities, datasets };
-}
-
-function buildLineData() {
-  const { monthlyTrend } = distributorData;
-  return {
-    labels: monthlyTrend.labels,
-    datasets: [
-      {
-        label: 'Bottles Distributed',
-        data: monthlyTrend.values,
-        borderColor: '#2ecc71',
-        backgroundColor: 'rgba(46,204,113,0.08)',
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
 }
 
 export default function DistributorDashboard() {
@@ -104,12 +81,6 @@ export default function DistributorDashboard() {
             <Grid item xs={12}>
               <DashboardSectionCard title="Product Demand by City">
                 <Bar data={buildBarData()} options={{ responsive: true, plugins: { legend: { position: 'top' } } }} />
-              </DashboardSectionCard>
-            </Grid>
-
-            <Grid item xs={12}>
-              <DashboardSectionCard title="Monthly Distribution Trend (All Products)">
-                <Line data={buildLineData()} options={{ responsive: true, plugins: { legend: { display: false } } }} />
               </DashboardSectionCard>
             </Grid>
           </Grid>

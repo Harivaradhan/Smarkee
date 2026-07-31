@@ -1,4 +1,5 @@
-import { Box, Typography, Grid, Paper, Button, Stack } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, Grid, Paper, Button, Stack, TextField, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import DashboardMetricCard from '../../components/AdminDashboard/DashboardMetricCard.jsx';
 import { userStats, recentActivity } from './userData.js';
@@ -11,6 +12,18 @@ import {
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const [rewardCode, setRewardCode] = useState('');
+  const [claimMessage, setClaimMessage] = useState('');
+
+  const handleClaimReward = () => {
+    if (!rewardCode.trim()) {
+      setClaimMessage('Please enter a reward code to claim your reward.');
+      return;
+    }
+
+    setClaimMessage(`Reward code “${rewardCode.trim()}” claimed successfully.`);
+    setRewardCode('');
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -23,10 +36,33 @@ export default function UserDashboard() {
             Keep recycling and earning rewards.
           </Typography>
         </Box>
-        <Button variant="contained" color="primary" size="large" onClick={() => navigate('/user/scan')}>
-          📷 Scan Bottle
-        </Button>
+        <Paper sx={{ p: 2, borderRadius: 3, boxShadow: 2, minWidth: { xs: '100%', sm: 360 } }}>
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Claim Reward
+            </Typography>
+            <TextField
+              size="small"
+              fullWidth
+              label="Reward Code"
+              value={rewardCode}
+              onChange={(e) => setRewardCode(e.target.value)}
+              placeholder="Enter reward code"
+            />
+            <Button variant="contained" color="primary" onClick={handleClaimReward}>
+              Claim Reward
+            </Button>
+          </Stack>
+        </Paper>
       </Box>
+
+      {claimMessage && (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity={claimMessage.includes('Please enter') ? 'warning' : 'success'}>
+            {claimMessage}
+          </Alert>
+        </Box>
+      )}
 
       <Grid container spacing={2} sx={{ mt: 3 }}>
         {userStats.map((stat) => {

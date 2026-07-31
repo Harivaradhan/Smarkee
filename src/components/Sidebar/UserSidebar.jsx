@@ -1,7 +1,6 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import {
   Dashboard,
-  CameraAlt,
   CardGiftcard,
   History,
   Person,
@@ -12,7 +11,6 @@ import useAuth from '../../hooks/useAuth.js';
 
 const items = [
   { label: 'Dashboard', path: '/user/dashboard', icon: <Dashboard /> },
-  { label: 'Scan Bottle', path: '/user/scan', icon: <CameraAlt /> },
   { label: 'Rewards', path: '/user/rewards', icon: <CardGiftcard /> },
   { label: 'Scan History', path: '/user/history', icon: <History /> },
   { label: 'Profile', path: '/user/profile', icon: <Person /> },

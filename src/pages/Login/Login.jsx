@@ -91,9 +91,7 @@ export default function Login() {
           <Typography variant="h5" fontWeight={700} gutterBottom>
             Smarkee
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Smart Bottle End-of-Life Traceability System
-          </Typography>
+         
         </Box>
 
         <Box component="form" noValidate onSubmit={handleSubmit}>
