@@ -24,9 +24,6 @@ export default function Navbar() {
 
         {isAuthenticated ? (
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              {user?.fullName || user?.username}
-            </Typography>
             <Button variant="outlined" color="primary" size="small" onClick={logout}>
               Logout
             </Button>

@@ -1,13 +1,15 @@
-import { Box, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
 import {
   Dashboard,
   CardGiftcard,
   History,
   Person,
   Logout,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth.js';
+import { leaderboard } from '../../pages/UserDashboard/userData.js';
 
 const items = [
   { label: 'Dashboard', path: '/user/dashboard', icon: <Dashboard /> },
@@ -34,6 +36,30 @@ export default function UserSidebar() {
           <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: 'grey.50' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <EmojiEvents color="primary" fontSize="small" />
+          <Typography variant="subtitle1" fontWeight={700}>
+            Leaderboard
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {leaderboard.map((entry) => (
+            <Box key={entry.rank} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" fontWeight={700} color="primary.main">
+                #{entry.rank} {entry.name}
+              </Typography>
+              <Typography variant="body2" fontWeight={600}>
+                {entry.points} pts
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
     </Box>
   );
 }

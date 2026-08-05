@@ -119,32 +119,35 @@ export default function UserDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 4, boxShadow: 3 }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              Environmental Impact
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              You have helped the environment by recycling responsibly.
-            </Typography>
-            <Stack spacing={2} sx={{ mt: 3 }}>
-              <Paper sx={{ p: 2, borderRadius: 3, bgcolor: 'rgba(46,125,50,0.08)' }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Total Bottles
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  186
-                </Typography>
-              </Paper>
-              <Paper sx={{ p: 2, borderRadius: 3, bgcolor: 'rgba(21,101,192,0.08)' }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  CO₂ Saved
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  32.8 kg
-                </Typography>
-              </Paper>
-            </Stack>
-          </Paper>
+          <Stack spacing={2}>
+            <Paper sx={{ p: 3, borderRadius: 4, boxShadow: 3 }}>
+              <Typography variant="h6" fontWeight={700} gutterBottom>
+                Environmental Impact
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                You have helped the environment by recycling responsibly.
+              </Typography>
+              <Stack spacing={2} sx={{ mt: 3 }}>
+                <Paper sx={{ p: 2, borderRadius: 3, bgcolor: 'rgba(46,125,50,0.08)' }}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Total Bottles
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    186
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 2, borderRadius: 3, bgcolor: 'rgba(21,101,192,0.08)' }}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    CO₂ Saved
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    32.8 kg
+                  </Typography>
+                </Paper>
+              </Stack>
+            </Paper>
+
+          </Stack>
         </Grid>
       </Grid>
     </Box>

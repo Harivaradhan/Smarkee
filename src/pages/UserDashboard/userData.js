@@ -12,6 +12,14 @@ export const recentActivity = [
   { id: 4, title: 'Fanta Bottle', subtitle: 'Yesterday, 6:30 PM', points: 20, status: 'Success' },
 ];
 
+export const leaderboard = [
+  { rank: 1, name: 'Hari Varadhan', points: 2450 },
+  { rank: 2, name: 'Aanya Menon', points: 2380 },
+  { rank: 3, name: 'Vikram Nair', points: 2315 },
+  { rank: 4, name: 'Priya S', points: 2250 },
+  { rank: 5, name: 'Rohan Iyer', points: 2180 },
+];
+
 export const rewardOffers = [
   { title: 'Free Recycle Kit', points: 500, description: 'Redeem for a starter recycling kit.' },
   { title: 'Eco Water Bottle', points: 1200, description: 'Reusable bottle made from recycled plastic.' },

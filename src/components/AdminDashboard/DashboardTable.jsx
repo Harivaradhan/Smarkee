@@ -10,9 +10,9 @@ export default function DashboardTable({ columns, rows = [], onView }) {
   }, [columns, rows]);
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
+    <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3, maxHeight: 360, overflow: 'auto' }}>
       <Table sx={{ minWidth: 650 }}>
-        <TableHead>
+        <TableHead sx={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: 'background.paper' }}>
           <TableRow>
             {inferredColumns.map((column) => (
               <TableCell key={column.field} sx={{ fontWeight: 700, color: 'text.secondary' }}>
