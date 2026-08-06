@@ -25,6 +25,45 @@ const smartBinsColumns = [
   { field: 'city', headerName: 'City' },
   { field: 'status', headerName: 'Status' },
 ];
+const fetchCityWiseCollection = async () => {
+  try {
+    const response = await axios.get(
+      "http://13.60.20.124:8000/transaction/all/"
+    );
+
+    const transactions = response.data.transactions;
+
+    // Count transactions by city
+    const cityCounts = transactions.reduce((acc, transaction) => {
+      const city = transaction.location?.trim();
+
+      if (city) {
+        acc[city] = (acc[city] || 0) + 1;
+      }
+
+      return acc;
+    }, {});
+
+    // Sort by highest collections and keep only top 10
+    const top10Cities = Object.entries(cityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // <-- Only top 10
+
+    setCityChartData({
+      labels: top10Cities.map(([city]) => city),
+      datasets: [
+        {
+          label: "Bottle Collections",
+          data: top10Cities.map(([, count]) => count),
+          backgroundColor: "#2E7D32",
+        },
+      ],
+    });
+
+  } catch (error) {
+    console.error("Error fetching city collection:", error);
+  }
+};
 
 
 const registrationsColumns = [
@@ -36,11 +75,7 @@ const registrationsColumns = [
 ];
 
 
-const pendingApprovals = [
-  { label: 'Manufacturers', value: 9 },
-  { label: 'Distributors', value: 5 },
-  { label: 'Recyclers', value: 4 },
-];
+
 
 
 export default function AdminDashboard() {
@@ -53,6 +88,168 @@ export default function AdminDashboard() {
     topLocation: "-",
     totalProducts: 0,
   });
+
+
+const [manufacturerCount, setManufacturerCount] = useState(0);
+const fetchManufacturerCount = async () => {
+  try {
+
+    const response = await axios.get(
+      "http://13.60.20.124:8000/customer/manufacturer/all/"
+    );
+
+
+    setManufacturerCount(response.data.length);
+
+
+  } catch(error) {
+
+    console.error(
+      "Error fetching manufacturer count:",
+      error
+    );
+
+  }
+};
+
+const fetchBottleCollectionTrend = async () => {
+  try {
+
+    const response = await axios.get(
+      "http://13.60.20.124:8000/transaction/all/"
+    );
+
+    const transactions = response.data.transactions;
+
+
+    // last 7 days
+    const last7Days = [];
+
+    for (let i = 6; i >= 0; i--) {
+
+      const date = new Date();
+
+      date.setDate(date.getDate() - i);
+
+      const formattedDate =
+        date.toLocaleDateString("en-GB");
+
+      last7Days.push(formattedDate);
+    }
+
+
+
+    const dateCounts = {};
+
+    last7Days.forEach(date => {
+      dateCounts[date] = 0;
+    });
+
+
+
+    transactions.forEach(transaction => {
+
+
+      // CHANGE HERE
+      const transactionDate =
+        new Date(transaction.transaction_time);
+
+
+
+      const formattedDate =
+        transactionDate.toLocaleDateString("en-GB");
+
+
+
+      if(dateCounts.hasOwnProperty(formattedDate)) {
+
+        dateCounts[formattedDate] += 1;
+
+      }
+
+    });
+
+
+
+    setLineChartData({
+
+      labels: last7Days,
+
+      datasets:[
+        {
+          label:"Bottles Collected",
+
+          data:last7Days.map(
+            date => dateCounts[date]
+          ),
+
+          borderColor:"#2E7D32",
+
+          backgroundColor:
+          "rgba(46,125,50,0.15)",
+
+          fill:true,
+
+          tension:0.4,
+
+          pointRadius:5,
+        }
+      ]
+
+    });
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Error fetching bottle collection trend:",
+      error
+    );
+
+  }
+};
+
+
+const fetchManufacturerTrend = async () => {
+  try {
+    const response = await axios.get(
+      "http://13.60.20.124:8000/customer/manufacturer/all/"
+    );
+
+    const manufacturers = response.data;
+
+    const dateCounts = manufacturers.reduce((acc, item) => {
+      const date = new Date(item.created_at).toLocaleDateString("en-GB");
+
+      acc[date] = (acc[date] || 0) + 1;
+
+      return acc;
+    }, {});
+
+    const sortedDates = Object.entries(dateCounts).sort(
+      (a, b) => new Date(a[0]) - new Date(b[0])
+    );
+
+    setLineChartData({
+      labels: sortedDates.map(([date]) => date),
+      datasets: [
+        {
+          label: "Manufacturers Registered",
+          data: sortedDates.map(([, count]) => count),
+          borderColor: "#2E7D32",
+          backgroundColor: "rgba(46,125,50,0.16)",
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Error fetching manufacturer trend:", error);
+  }
+};
+
+
 
 
  const fetchKpiData = async () => {
@@ -100,34 +297,20 @@ export default function AdminDashboard() {
 
     });
 
-// CITY-WISE COLLECTION GRAPH
-
-const transactions = data.transactions;
-
-const cityCounts = transactions.reduce((acc, transaction) => {
-  const city = transaction.location;
-
-  acc[city] = (acc[city] || 0) + 1;
-
-  return acc;
-}, {});
 
 
-const sortedCities = Object.entries(cityCounts)
-  .sort((a, b) => b[1] - a[1]);
 
-setCityChartData({
-  labels: sortedCities.map(([city]) => city),
-  datasets: [
-    {
-      label: "Bottle Collections",
-      data: sortedCities.map(([, count]) => count),
-      backgroundColor: "#2E7D32",
-    },
-  ],
-});
+
 
 // TOP MANUFACTURER TRANSACTION BY CITY
+
+const transactionResponse = await axios.get(
+  "http://13.60.20.124:8000/transaction/all/"
+);
+
+
+const transactions = transactionResponse.data.transactions;
+
 
 const manufacturerCityCount = transactions.reduce(
   (acc, transaction) => {
@@ -156,20 +339,18 @@ Object.entries(manufacturerCityCount)
 
 setManufacturerTransactionChartData({
 
-  labels:
-    sortedManufacturerCities.map(
-      ([city]) => city
-    ),
+  labels: sortedManufacturerCities.map(
+    ([city]) => city
+  ),
 
 
   datasets:[
     {
       label:"Transactions",
 
-      data:
-        sortedManufacturerCities.map(
-          ([,count])=>count
-        ),
+      data: sortedManufacturerCities.map(
+        ([,count])=>count
+      ),
 
       backgroundColor:"#1976D2"
     }
@@ -189,12 +370,55 @@ setManufacturerTransactionChartData({
 
 };
 
+const fetchCityWiseCollection = async () => {
+  try {
+    const response = await axios.get(
+      "http://13.60.20.124:8000/transaction/all/"
+    );
 
-  useEffect(() => {
-    fetchKpiData();
-  }, []);
+    const transactions = response.data.transactions;
 
+    const cityCounts = transactions.reduce((acc, transaction) => {
+      const city = transaction.location;
 
+      if (city) {
+        acc[city] = (acc[city] || 0) + 1;
+      }
+
+      return acc;
+    }, {});
+
+   const top10Cities = Object.entries(cityCounts)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
+
+setCityChartData({
+  labels: top10Cities.map(([city]) => city),
+  datasets: [
+    {
+      label: "Bottle Collections",
+      data: top10Cities.map(([, count]) => count),
+      backgroundColor: "#2E7D32",
+    },
+  ],
+});
+
+  } catch (error) {
+    console.error("Error fetching city collection:", error);
+  }
+};
+
+useEffect(() => {
+
+  fetchKpiData();
+
+  fetchCityWiseCollection();
+
+  fetchBottleCollectionTrend();
+
+  fetchManufacturerCount();
+
+}, []);
 
   const metrics = [
     {
@@ -223,37 +447,25 @@ setManufacturerTransactionChartData({
       icon: <RecyclingIcon color="primary" />
     },
     {
-      label: "Manufacturers",
-      value: pendingApprovals.find((item) => item.label === 'Manufacturers')?.value ?? 0,
-      icon: <FactoryIcon color="primary" />
-    },
+  label: "Manufacturers",
+  value: manufacturerCount,
+  icon: <FactoryIcon color="primary" />
+},
     {
-      label: "Distributors",
-      value: pendingApprovals.find((item) => item.label === 'Distributors')?.value ?? 0,
-      icon: <LocalShippingIcon color="primary" />
-    },
-    {
-      label: "Recyclers",
-      value: pendingApprovals.find((item) => item.label === 'Recyclers')?.value ?? 0,
-      icon: <RecyclingIcon color="primary" />
-    }
+  label: "Distributors",
+  value: 0,
+  icon: <LocalShippingIcon color="primary" />
+},
+{
+  label: "Recyclers",
+  value: 0,
+  icon: <RecyclingIcon color="primary" />
+}
   ];
 
 
 
-  const lineChartData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      {
-        label: 'Bottles Collected',
-        data: [120, 132, 148, 160, 172, 190, 210],
-        borderColor: '#2E7D32',
-        backgroundColor: 'rgba(46,125,50,0.16)',
-        fill: true,
-        tension: 0.3,
-      },
-    ],
-  };
+
 
 
   const manufacturersChartData = {
@@ -281,6 +493,19 @@ setManufacturerTransactionChartData({
       label: "Demand Index",
       data: [],
       backgroundColor: "#1565C0",
+    },
+  ],
+});
+const [lineChartData, setLineChartData] = useState({
+  labels: [],
+  datasets: [
+    {
+      label: "Bottle Collections",
+      data: [],
+      borderColor: "#2E7D32",
+      backgroundColor: "rgba(46,125,50,0.16)",
+      fill: true,
+      tension: 0.3,
     },
   ],
 });
@@ -357,12 +582,17 @@ useState({
         <Stack direction="row" spacing={2}>
 
           <Button
-            variant="outlined"
-            color="primary"
-            onClick={fetchKpiData}
-          >
-            Refresh Data
-          </Button>
+  variant="outlined"
+  color="primary"
+ onClick={() => {
+  fetchKpiData();
+  fetchCityWiseCollection();
+  fetchBottleCollectionTrend();
+  fetchManufacturerCount();
+}}
+>
+  Refresh Data
+</Button>
 
         </Stack>
 
