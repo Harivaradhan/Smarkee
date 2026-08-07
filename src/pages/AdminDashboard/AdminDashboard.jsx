@@ -28,7 +28,7 @@ const smartBinsColumns = [
 const fetchCityWiseCollection = async () => {
   try {
     const response = await axios.get(
-      "http://13.60.20.124:8000/transaction/all/"
+      "http://13.60.20.124:8000/transaction/transactions/"
     );
 
     const transactions = response.data.transactions;
@@ -91,6 +91,9 @@ export default function AdminDashboard() {
 
 
 const [manufacturerCount, setManufacturerCount] = useState(0);
+const [totalBottlesCollected, setTotalBottlesCollected] = useState(0);
+
+
 const fetchManufacturerCount = async () => {
   try {
 
@@ -112,11 +115,26 @@ const fetchManufacturerCount = async () => {
   }
 };
 
+const fetchTotalBottlesCollected = async () => {
+  try {
+    const response = await axios.get(
+      "http://13.60.20.124:8000/transaction/transactions/"
+    );
+
+    const transactions = response.data.transactions || [];
+
+    setTotalBottlesCollected(transactions.length);
+  } catch (error) {
+    console.error("Error fetching total bottles collected:", error);
+  }
+};
+
+
 const fetchBottleCollectionTrend = async () => {
   try {
 
     const response = await axios.get(
-      "http://13.60.20.124:8000/transaction/all/"
+      "http://13.60.20.124:8000/transaction/transactions/"
     );
 
     const transactions = response.data.transactions;
@@ -305,7 +323,7 @@ const fetchManufacturerTrend = async () => {
 // TOP MANUFACTURER TRANSACTION BY CITY
 
 const transactionResponse = await axios.get(
-  "http://13.60.20.124:8000/transaction/all/"
+  "http://13.60.20.124:8000/transaction/transactions/"
 );
 
 
@@ -373,7 +391,7 @@ setManufacturerTransactionChartData({
 const fetchCityWiseCollection = async () => {
   try {
     const response = await axios.get(
-      "http://13.60.20.124:8000/transaction/all/"
+      "http://13.60.20.124:8000/transaction/transactions/"
     );
 
     const transactions = response.data.transactions;
@@ -418,6 +436,8 @@ useEffect(() => {
 
   fetchManufacturerCount();
 
+  fetchTotalBottlesCollected();
+
 }, []);
 
   const metrics = [
@@ -451,10 +471,10 @@ useEffect(() => {
   value: manufacturerCount,
   icon: <FactoryIcon color="primary" />
 },
-    {
-  label: "Distributors",
-  value: 0,
-  icon: <LocalShippingIcon color="primary" />
+{
+  label: "Total Bottles Collected",
+  value: totalBottlesCollected,
+  icon: <RecyclingIcon />,
 },
 {
   label: "Recyclers",
@@ -584,11 +604,12 @@ useState({
           <Button
   variant="outlined"
   color="primary"
- onClick={() => {
+onClick={() => {
   fetchKpiData();
   fetchCityWiseCollection();
   fetchBottleCollectionTrend();
   fetchManufacturerCount();
+  fetchTotalBottlesCollected();
 }}
 >
   Refresh Data
